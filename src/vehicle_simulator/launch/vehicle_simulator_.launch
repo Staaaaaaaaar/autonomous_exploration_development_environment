@@ -12,17 +12,17 @@
   <arg name="vehicleYaw" default="0"/>
 
   <arg name="terrainVoxelSize" default="0.05"/>
-  <arg name="groundHeightThre" default="0.1"/>
+  <arg name="groundHeightThre" default="0.4"/>
   <arg name="adjustZ" default="true"/>
-  <arg name="terrainRadiusZ" default="1.0"/>
-  <arg name="minTerrainPointNumZ" default="5"/>
-  <arg name="smoothRateZ" default="0.5"/>
+  <arg name="terrainRadiusZ" default="0.8"/>
+  <arg name="minTerrainPointNumZ" default="50"/>
+  <arg name="smoothRateZ" default="0.9"/>
   <arg name="adjustIncl" default="true"/>
   <arg name="terrainRadiusIncl" default="2.0"/>
   <arg name="minTerrainPointNumIncl" default="200"/>
-  <arg name="smoothRateIncl" default="0.5"/>
+  <arg name="smoothRateIncl" default="0.9"/>
   <arg name="InclFittingThre" default="0.2"/>
-  <arg name="maxIncl" default="30.0"/>
+  <arg name="maxIncl" default="40.0"/>
 
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>

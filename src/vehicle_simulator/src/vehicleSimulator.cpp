@@ -2,13 +2,16 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 #include <ros/ros.h>
+#include <ros/package.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <std_msgs/Bool.h>
+#include <std_msgs/Float64.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/TwistStamped.h>
@@ -95,6 +98,31 @@ int odomRecIDPointer = 0;
 pcl::VoxelGrid<pcl::PointXYZI> terrainDwzFilter;
 
 ros::Publisher* pubScanPointer = NULL;
+
+bool exploration_finish_logged = false;
+std::string exploration_finish_topic = "/exploration_finish_time";
+std::string exploration_finish_log_path;
+
+void explorationFinishCallback(const std_msgs::Float64::ConstPtr& msg)
+{
+  if (exploration_finish_logged)
+  {
+    return;
+  }
+
+  std::ofstream log_file(exploration_finish_log_path.c_str(), std::ios::out | std::ios::app);
+  if (log_file.is_open())
+  {
+    log_file << msg->data << std::endl;
+    log_file.close();
+    exploration_finish_logged = true;
+    ROS_INFO("Exploration finish time logged: %.6f", msg->data);
+  }
+  else
+  {
+    ROS_WARN("Failed to open exploration finish time log file: %s", exploration_finish_log_path.c_str());
+  }
+}
 
 void scanHandler(const sensor_msgs::PointCloud2::ConstPtr& scanIn)
 {
@@ -327,11 +355,25 @@ int main(int argc, char** argv)
   nhPrivate.getParam("InclFittingThre", InclFittingThre);
   nhPrivate.getParam("maxIncl", maxIncl);
 
+  nhPrivate.getParam("explorationFinishTimeTopic", exploration_finish_topic);
+  {
+    char time_buf[64];
+    std::time_t now = std::time(nullptr);
+    std::tm* tm_now = std::localtime(&now);
+    std::snprintf(time_buf, sizeof(time_buf), "%d-%d-%d-%d-%d-%d", tm_now->tm_year + 1900, tm_now->tm_mon + 1,
+                  tm_now->tm_mday, tm_now->tm_hour, tm_now->tm_min, tm_now->tm_sec);
+    exploration_finish_log_path =
+        ros::package::getPath("vehicle_simulator") + "/log/exploration_finish_time_" + time_buf + ".txt";
+  }
+
   ros::Subscriber subScan = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points", 2, scanHandler);
 
   ros::Subscriber subTerrainCloud = nh.subscribe<sensor_msgs::PointCloud2>("/terrain_map", 2, terrainCloudHandler);
 
   ros::Subscriber subSpeed = nh.subscribe<geometry_msgs::TwistStamped>("/cmd_vel", 5, speedHandler);
+
+  ros::Subscriber subExplorationFinish =
+      nh.subscribe<std_msgs::Float64>(exploration_finish_topic, 1, explorationFinishCallback);
 
   ros::Publisher pubVehicleOdom = nh.advertise<nav_msgs::Odometry>("/state_estimation", 5);
 

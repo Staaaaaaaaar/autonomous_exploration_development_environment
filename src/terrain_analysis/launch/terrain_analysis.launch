@@ -1,5 +1,7 @@
 <launch>
 
+  <arg name="vehicleHeight" default="1.5"/>
+
   <node pkg="terrain_analysis" type="terrainAnalysis" name="terrainAnalysis" output="screen" required="true">
     <param name="scanVoxelSize" type="double" value="0.05" />
     <param name="decayTime" type="double" value="2.0" />
@@ -21,7 +23,7 @@
     <param name="noDataObstacle" type="bool" value="false" />
     <param name="noDataBlockSkipNum" type="int" value="0" />
     <param name="minBlockPointNum" type="int" value="10" />
-    <param name="vehicleHeight" type="double" value="1.5" />
+    <param name="vehicleHeight" type="double" value="$(arg vehicleHeight)" />
     <param name="voxelPointUpdateThre" type="int" value="100" />
     <param name="voxelTimeUpdateThre" type="double" value="2.0" />
     <param name="minRelZ" type="double" value="-2.5" />
